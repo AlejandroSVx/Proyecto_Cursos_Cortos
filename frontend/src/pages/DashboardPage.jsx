@@ -23,22 +23,19 @@ export default function DashboardPage({
       </p>
 
       <div className="dashboard-grid">
-        {modulos.map(
-          ([valor, texto]) => (
-            <button
-              key={valor}
-              className="dashboard-card"
-              onClick={() =>
-                setPagina(valor)
-              }
-            >
-              <h2>{texto}</h2>
-              <p>
-                Gestionar información de {texto.toLowerCase()}.
-              </p>
-            </button>
-          )
-        )}
+        {modulos.map(([valor, texto]) => (
+          <button
+            key={valor}
+            className="dashboard-card"
+            onClick={() => setPagina(valor)}
+          >
+            <h2>{texto}</h2>
+            <p>
+              Gestionar información de{" "}
+              {texto.toLowerCase()}.
+            </p>
+          </button>
+        ))}
       </div>
     </div>
   );

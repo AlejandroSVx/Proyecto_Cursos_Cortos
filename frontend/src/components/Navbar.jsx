@@ -21,23 +21,19 @@ export default function Navbar({
       </div>
 
       <div className="navbar-links">
-        {opciones.map(
-          ([valor, texto]) => (
-            <button
-              key={valor}
-              className={
-                pagina === valor
-                  ? "nav-button active"
-                  : "nav-button"
-              }
-              onClick={() =>
-                setPagina(valor)
-              }
-            >
-              {texto}
-            </button>
-          )
-        )}
+        {opciones.map(([valor, texto]) => (
+          <button
+            key={valor}
+            className={
+              pagina === valor
+                ? "nav-button active"
+                : "nav-button"
+            }
+            onClick={() => setPagina(valor)}
+          >
+            {texto}
+          </button>
+        ))}
       </div>
     </nav>
   );
