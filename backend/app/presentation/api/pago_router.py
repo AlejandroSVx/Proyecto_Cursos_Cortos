@@ -28,7 +28,11 @@ from app.application.use_cases.pagos.eliminar_pago import (
     EliminarPagoUseCase,
 )
 
-from app.core.dependencies import get_db
+from app.core.dependencies import (
+    get_current_user,
+    get_db,
+)
+
 from app.domain.entities.pago import Pago
 
 from app.infrastructure.repositories.pago_repository_impl import (
@@ -42,6 +46,9 @@ from app.infrastructure.repositories.inscripcion_repository_impl import (
 router = APIRouter(
     prefix="/pagos",
     tags=["Pagos"],
+    dependencies=[
+        Depends(get_current_user)
+    ],
 )
 
 

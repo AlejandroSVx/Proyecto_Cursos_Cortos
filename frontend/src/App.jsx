@@ -1,72 +1,209 @@
-import { useState } from "react";
+import {
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
 
-import Navbar from "./components/Navbar";
+import {
+  useAuth,
+} from "./auth/AuthContext";
 
-import DashboardPage from "./pages/DashboardPage";
-import CursosPage from "./pages/CursosPage";
-import ParticipantesPage from "./pages/ParticipantesPage";
-import InscripcionesPage from "./pages/InscripcionesPage";
-import PagosPage from "./pages/PagosPage";
-import InstructoresPage from "./pages/InstructoresPage";
-import AulasPage from "./pages/AulasPage";
-import AsignacionesPage from "./pages/AsignacionesPage";
-import CertificadosPage from "./pages/CertificadosPage";
+import ProtectedRoute
+  from "./auth/ProtectedRoute";
 
-import "./App.css";
+import Navbar
+  from "./components/Navbar";
+
+import LoginPage
+  from "./pages/LoginPage";
+
+import DashboardPage
+  from "./pages/DashboardPage";
+
+import CursosPage
+  from "./pages/CursosPage";
+
+import ParticipantesPage
+  from "./pages/ParticipantesPage";
+
+import InscripcionesPage
+  from "./pages/InscripcionesPage";
+
+import PagosPage
+  from "./pages/PagosPage";
+
+import InstructoresPage
+  from "./pages/InstructoresPage";
+
+import AulasPage
+  from "./pages/AulasPage";
+
+import AsignacionesPage
+  from "./pages/AsignacionesPage";
+
+import CertificadosPage
+  from "./pages/CertificadosPage";
 
 
-function App() {
-  const [pagina, setPagina] =
-    useState("dashboard");
-
-  function renderPagina() {
-    switch (pagina) {
-      case "cursos":
-        return <CursosPage />;
-
-      case "participantes":
-        return <ParticipantesPage />;
-
-      case "inscripciones":
-        return <InscripcionesPage />;
-
-      case "pagos":
-        return <PagosPage />;
-
-      case "instructores":
-        return <InstructoresPage />;
-
-      case "aulas":
-        return <AulasPage />;
-
-      case "asignaciones":
-        return <AsignacionesPage />;
-
-      case "certificados":
-        return <CertificadosPage />;
-
-      default:
-        return (
-          <DashboardPage
-            setPagina={setPagina}
-          />
-        );
-    }
-  }
+function Layout({
+  children,
+}) {
 
   return (
-    <>
-      <Navbar
-        pagina={pagina}
-        setPagina={setPagina}
-      />
+    <ProtectedRoute>
 
-      <main className="container">
-        {renderPagina()}
-      </main>
-    </>
+      <div className="app-layout">
+
+        <Navbar />
+
+        <main className="app-content">
+          {children}
+        </main>
+
+      </div>
+
+    </ProtectedRoute>
   );
 }
 
 
-export default App;
+export default function App() {
+
+  const {
+    autenticado,
+  } = useAuth();
+
+
+  return (
+    <Routes>
+
+      <Route
+        path="/login"
+        element={
+          <LoginPage />
+        }
+      />
+
+
+      <Route
+        path="/dashboard"
+        element={
+          <Layout>
+            <DashboardPage />
+          </Layout>
+        }
+      />
+
+
+      <Route
+        path="/cursos"
+        element={
+          <Layout>
+            <CursosPage />
+          </Layout>
+        }
+      />
+
+
+      <Route
+        path="/participantes"
+        element={
+          <Layout>
+            <ParticipantesPage />
+          </Layout>
+        }
+      />
+
+
+      <Route
+        path="/inscripciones"
+        element={
+          <Layout>
+            <InscripcionesPage />
+          </Layout>
+        }
+      />
+
+
+      <Route
+        path="/pagos"
+        element={
+          <Layout>
+            <PagosPage />
+          </Layout>
+        }
+      />
+
+
+      <Route
+        path="/instructores"
+        element={
+          <Layout>
+            <InstructoresPage />
+          </Layout>
+        }
+      />
+
+
+      <Route
+        path="/aulas"
+        element={
+          <Layout>
+            <AulasPage />
+          </Layout>
+        }
+      />
+
+
+      <Route
+        path="/asignaciones"
+        element={
+          <Layout>
+            <AsignacionesPage />
+          </Layout>
+        }
+      />
+
+
+      <Route
+        path="/certificados"
+        element={
+          <Layout>
+            <CertificadosPage />
+          </Layout>
+        }
+      />
+
+
+      <Route
+        path="/"
+        element={
+          <Navigate
+            to={
+              autenticado
+                ? "/dashboard"
+                : "/login"
+            }
+            replace
+          />
+        }
+      />
+
+
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to={
+              autenticado
+                ? "/dashboard"
+                : "/login"
+            }
+            replace
+          />
+        }
+      />
+
+    </Routes>
+  );
+}

@@ -1,21 +1,15 @@
 from datetime import date
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class PagoBase(BaseModel):
     inscripcion_id: int
     fecha_pago: date
-
-    monto: float = Field(
-        gt=0
-    )
-
+    monto: float
     metodo_pago: str
-
     referencia_pago: Optional[str] = None
-
     estado_pago: str = "PENDIENTE"
 
 

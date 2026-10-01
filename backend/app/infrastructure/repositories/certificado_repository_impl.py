@@ -15,7 +15,10 @@ class CertificadoRepositoryImpl(
     CertificadoRepository
 ):
 
-    def __init__(self, db: Session):
+    def __init__(
+        self,
+        db: Session
+    ):
         self.db = db
 
     def crear(
@@ -36,12 +39,16 @@ class CertificadoRepositoryImpl(
 
         return self._to_entity(modelo)
 
-    def listar(self) -> List[Certificado]:
+    def listar(
+        self
+    ) -> List[Certificado]:
 
         modelos = (
             self.db
             .query(CertificadoModel)
-            .order_by(CertificadoModel.id)
+            .order_by(
+                CertificadoModel.id
+            )
             .all()
         )
 
@@ -61,26 +68,6 @@ class CertificadoRepositoryImpl(
             .filter(
                 CertificadoModel.id
                 == certificado_id
-            )
-            .first()
-        )
-
-        if not modelo:
-            return None
-
-        return self._to_entity(modelo)
-
-    def obtener_por_inscripcion(
-        self,
-        inscripcion_id: int
-    ) -> Optional[Certificado]:
-
-        modelo = (
-            self.db
-            .query(CertificadoModel)
-            .filter(
-                CertificadoModel.inscripcion_id
-                == inscripcion_id
             )
             .first()
         )
@@ -152,6 +139,29 @@ class CertificadoRepositoryImpl(
         self.db.commit()
 
         return True
+
+    def existe_por_inscripcion(
+        self,
+        inscripcion_id: int,
+        excluir_certificado_id: int | None = None,
+    ) -> bool:
+
+        query = (
+            self.db
+            .query(CertificadoModel)
+            .filter(
+                CertificadoModel.inscripcion_id
+                == inscripcion_id
+            )
+        )
+
+        if excluir_certificado_id is not None:
+            query = query.filter(
+                CertificadoModel.id
+                != excluir_certificado_id
+            )
+
+        return query.first() is not None
 
     @staticmethod
     def _to_entity(

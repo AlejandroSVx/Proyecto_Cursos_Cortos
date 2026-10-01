@@ -1,5 +1,7 @@
 from app.domain.entities.curso import Curso
-from app.domain.repositories.curso_repository import CursoRepository
+from app.domain.repositories.curso_repository import (
+    CursoRepository,
+)
 
 
 class CrearCursoUseCase:
@@ -10,20 +12,36 @@ class CrearCursoUseCase:
     ):
         self.repository = repository
 
-
     def ejecutar(
         self,
         curso: Curso
     ) -> Curso:
 
-        if curso.fecha_fin < curso.fecha_inicio:
+        if curso.fecha_fin <= curso.fecha_inicio:
             raise ValueError(
-                "La fecha fin no puede ser menor que la fecha inicio"
+                "La fecha de finalización debe ser "
+                "posterior a la fecha de inicio"
             )
 
-        if curso.cupo_maximo < curso.cupo_minimo:
+        if curso.cupo_minimo < 0:
             raise ValueError(
-                "El cupo máximo no puede ser menor que el cupo mínimo"
+                "El cupo mínimo no puede ser negativo"
             )
 
-        return self.repository.crear(curso)
+        if curso.cupo_maximo <= 0:
+            raise ValueError(
+                "El cupo máximo debe ser mayor a cero"
+            )
+
+        if (
+            curso.cupo_maximo
+            < curso.cupo_minimo
+        ):
+            raise ValueError(
+                "El cupo máximo no puede ser "
+                "menor al cupo mínimo"
+            )
+
+        return self.repository.crear(
+            curso
+        )

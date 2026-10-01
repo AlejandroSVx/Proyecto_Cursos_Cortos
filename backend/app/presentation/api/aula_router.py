@@ -18,7 +18,11 @@ from app.application.use_cases.aulas.obtener_aula import ObtenerAulaUseCase
 from app.application.use_cases.aulas.actualizar_aula import ActualizarAulaUseCase
 from app.application.use_cases.aulas.eliminar_aula import EliminarAulaUseCase
 
-from app.core.dependencies import get_db
+from app.core.dependencies import (
+    get_current_user,
+    get_db,
+)
+
 from app.domain.entities.aula import Aula
 
 from app.infrastructure.repositories.aula_repository_impl import (
@@ -29,6 +33,9 @@ from app.infrastructure.repositories.aula_repository_impl import (
 router = APIRouter(
     prefix="/aulas",
     tags=["Aulas"],
+    dependencies=[
+        Depends(get_current_user)
+    ],
 )
 
 

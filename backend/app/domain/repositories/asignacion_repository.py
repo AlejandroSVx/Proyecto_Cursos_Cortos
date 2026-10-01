@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from app.domain.entities.asignacion import Asignacion
+from app.domain.entities.asignacion import (
+    Asignacion,
+)
 
 
 class AsignacionRepository(ABC):
@@ -14,7 +16,9 @@ class AsignacionRepository(ABC):
         pass
 
     @abstractmethod
-    def listar(self) -> List[Asignacion]:
+    def listar(
+        self
+    ) -> List[Asignacion]:
         pass
 
     @abstractmethod
@@ -36,5 +40,23 @@ class AsignacionRepository(ABC):
     def eliminar(
         self,
         asignacion_id: int
+    ) -> bool:
+        pass
+
+    @abstractmethod
+    def existe_conflicto_horario(
+        self,
+        curso_id: int,
+        instructor_id: int,
+        aula_id: int,
+        excluir_asignacion_id: int | None = None,
+    ) -> tuple[bool, str | None]:
+        pass
+
+    @abstractmethod
+    def existe_asignacion_activa_curso(
+        self,
+        curso_id: int,
+        excluir_asignacion_id: int | None = None,
     ) -> bool:
         pass

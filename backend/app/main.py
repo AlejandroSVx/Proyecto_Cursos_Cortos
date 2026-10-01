@@ -15,7 +15,7 @@ from app.infrastructure.models.instructor_model import InstructorModel
 from app.infrastructure.models.aula_model import AulaModel
 from app.infrastructure.models.asignacion_model import AsignacionModel
 from app.infrastructure.models.certificado_model import CertificadoModel
-
+from app.infrastructure.models.usuario_model import (UsuarioModel,)
 
 # ROUTERS
 from app.presentation.api.curso_router import (
@@ -50,6 +50,9 @@ from app.presentation.api.certificado_router import (
     router as certificado_router,
 )
 
+from app.presentation.api.auth_router import (
+    router as auth_router,
+)
 
 Base.metadata.create_all(
     bind=engine
@@ -78,7 +81,7 @@ app.include_router(instructor_router)
 app.include_router(aula_router)
 app.include_router(asignacion_router)
 app.include_router(certificado_router)
-
+app.include_router(auth_router)
 
 @app.get("/")
 def inicio():

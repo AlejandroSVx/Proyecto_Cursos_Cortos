@@ -14,20 +14,15 @@ class CertificadoRepository(ABC):
         pass
 
     @abstractmethod
-    def listar(self) -> List[Certificado]:
+    def listar(
+        self
+    ) -> List[Certificado]:
         pass
 
     @abstractmethod
     def obtener_por_id(
         self,
         certificado_id: int
-    ) -> Optional[Certificado]:
-        pass
-
-    @abstractmethod
-    def obtener_por_inscripcion(
-        self,
-        inscripcion_id: int
     ) -> Optional[Certificado]:
         pass
 
@@ -43,5 +38,13 @@ class CertificadoRepository(ABC):
     def eliminar(
         self,
         certificado_id: int
+    ) -> bool:
+        pass
+
+    @abstractmethod
+    def existe_por_inscripcion(
+        self,
+        inscripcion_id: int,
+        excluir_certificado_id: int | None = None,
     ) -> bool:
         pass

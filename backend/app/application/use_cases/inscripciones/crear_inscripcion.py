@@ -1,10 +1,15 @@
-from app.domain.entities.inscripcion import Inscripcion
+from app.domain.entities.inscripcion import (
+    Inscripcion,
+)
+
 from app.domain.repositories.inscripcion_repository import (
     InscripcionRepository,
 )
+
 from app.domain.repositories.participante_repository import (
     ParticipanteRepository,
 )
+
 from app.domain.repositories.curso_repository import (
     CursoRepository,
 )
@@ -21,10 +26,14 @@ class CrearInscripcionUseCase:
         self.inscripcion_repository = (
             inscripcion_repository
         )
+
         self.participante_repository = (
             participante_repository
         )
-        self.curso_repository = curso_repository
+
+        self.curso_repository = (
+            curso_repository
+        )
 
     def ejecutar(
         self,
@@ -32,7 +41,8 @@ class CrearInscripcionUseCase:
     ) -> Inscripcion:
 
         participante = (
-            self.participante_repository.obtener_por_id(
+            self.participante_repository
+            .obtener_por_id(
                 inscripcion.participante_id
             )
         )
@@ -43,7 +53,8 @@ class CrearInscripcionUseCase:
             )
 
         curso = (
-            self.curso_repository.obtener_por_id(
+            self.curso_repository
+            .obtener_por_id(
                 inscripcion.curso_id
             )
         )
@@ -61,14 +72,19 @@ class CrearInscripcionUseCase:
         duplicada = (
             self.inscripcion_repository
             .existe_inscripcion_activa(
-                inscripcion.participante_id,
-                inscripcion.curso_id,
+                participante_id=(
+                    inscripcion.participante_id
+                ),
+                curso_id=(
+                    inscripcion.curso_id
+                ),
             )
         )
 
         if duplicada:
             raise ValueError(
-                "El participante ya tiene una inscripción activa en este curso"
+                "El participante ya se encuentra "
+                "inscrito en este curso"
             )
 
         inscritos = (
@@ -80,9 +96,12 @@ class CrearInscripcionUseCase:
 
         if inscritos >= curso.cupo_maximo:
             raise ValueError(
-                "El curso alcanzó el cupo máximo"
+                "El curso no tiene cupos disponibles"
             )
 
-        return self.inscripcion_repository.crear(
-            inscripcion
+        return (
+            self.inscripcion_repository
+            .crear(
+                inscripcion
+            )
         )

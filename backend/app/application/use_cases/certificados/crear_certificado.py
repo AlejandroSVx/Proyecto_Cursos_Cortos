@@ -3,9 +3,11 @@ from app.domain.entities.certificado import Certificado
 from app.domain.repositories.certificado_repository import (
     CertificadoRepository,
 )
+
 from app.domain.repositories.inscripcion_repository import (
     InscripcionRepository,
 )
+
 from app.domain.repositories.curso_repository import (
     CursoRepository,
 )
@@ -19,17 +21,27 @@ class CrearCertificadoUseCase:
         inscripcion_repository: InscripcionRepository,
         curso_repository: CursoRepository,
     ):
-        self.certificado_repository = certificado_repository
-        self.inscripcion_repository = inscripcion_repository
-        self.curso_repository = curso_repository
+        self.certificado_repository = (
+            certificado_repository
+        )
+
+        self.inscripcion_repository = (
+            inscripcion_repository
+        )
+
+        self.curso_repository = (
+            curso_repository
+        )
 
     def ejecutar(
         self,
         certificado: Certificado
     ) -> Certificado:
 
+        # 1. Verificar que exista la inscripción
         inscripcion = (
-            self.inscripcion_repository.obtener_por_id(
+            self.inscripcion_repository
+            .obtener_por_id(
                 certificado.inscripcion_id
             )
         )
@@ -39,8 +51,27 @@ class CrearCertificadoUseCase:
                 "Inscripción no encontrada"
             )
 
-        curso = self.curso_repository.obtener_por_id(
-            inscripcion.curso_id
+        # 2. Evitar dos certificados
+        # para la misma inscripción
+        existe_certificado = (
+            self.certificado_repository
+            .existe_por_inscripcion(
+                certificado.inscripcion_id
+            )
+        )
+
+        if existe_certificado:
+            raise ValueError(
+                "La inscripción ya tiene "
+                "un certificado emitido"
+            )
+
+        # 3. Buscar el curso asociado
+        curso = (
+            self.curso_repository
+            .obtener_por_id(
+                inscripcion.curso_id
+            )
         )
 
         if not curso:
@@ -48,34 +79,17 @@ class CrearCertificadoUseCase:
                 "Curso no encontrado"
             )
 
+        # 4. Solo cursos finalizados
+        # pueden emitir certificados
         if curso.estado != "FINALIZADO":
             raise ValueError(
-                "El curso todavía no está finalizado"
+                "El curso aún no ha finalizado"
             )
 
-        existente = (
+        # 5. Crear certificado
+        return (
             self.certificado_repository
-            .obtener_por_inscripcion(
-                certificado.inscripcion_id
+            .crear(
+                certificado
             )
-        )
-
-        if existente:
-            raise ValueError(
-                "La inscripción ya tiene un certificado"
-            )
-
-        estados_validos = [
-            "GENERADO",
-            "ENTREGADO",
-            "ANULADO",
-        ]
-
-        if certificado.estado_certificado not in estados_validos:
-            raise ValueError(
-                "Estado de certificado no válido"
-            )
-
-        return self.certificado_repository.crear(
-            certificado
         )

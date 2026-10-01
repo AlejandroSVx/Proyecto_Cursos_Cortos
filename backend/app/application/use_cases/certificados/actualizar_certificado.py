@@ -1,16 +1,17 @@
 from app.domain.entities.certificado import Certificado
-from app.domain.repositories.certificado_repository import (
-    CertificadoRepository,
-)
+from app.domain.repositories.certificado_repository import CertificadoRepository
+from app.domain.repositories.inscripcion_repository import InscripcionRepository
 
 
 class ActualizarCertificadoUseCase:
 
     def __init__(
         self,
-        repository: CertificadoRepository
+        certificado_repository: CertificadoRepository,
+        inscripcion_repository: InscripcionRepository,
     ):
-        self.repository = repository
+        self.certificado_repository = certificado_repository
+        self.inscripcion_repository = inscripcion_repository
 
     def ejecutar(
         self,
@@ -18,20 +19,38 @@ class ActualizarCertificadoUseCase:
         certificado: Certificado
     ) -> Certificado:
 
-        estados_validos = [
-            "GENERADO",
-            "ENTREGADO",
-            "ANULADO",
-        ]
+        inscripcion = (
+            self.inscripcion_repository
+            .obtener_por_id(
+                certificado.inscripcion_id
+            )
+        )
 
-        if certificado.estado_certificado not in estados_validos:
+        if not inscripcion:
             raise ValueError(
-                "Estado de certificado no válido"
+                "Inscripción no encontrada"
             )
 
-        actualizado = self.repository.actualizar(
-            certificado_id,
-            certificado
+        existe = (
+            self.certificado_repository
+            .existe_por_inscripcion(
+                inscripcion_id=certificado.inscripcion_id,
+                excluir_certificado_id=certificado_id,
+            )
+        )
+
+        if existe:
+            raise ValueError(
+                "La inscripción ya tiene "
+                "un certificado emitido"
+            )
+
+        actualizado = (
+            self.certificado_repository
+            .actualizar(
+                certificado_id,
+                certificado
+            )
         )
 
         if not actualizado:

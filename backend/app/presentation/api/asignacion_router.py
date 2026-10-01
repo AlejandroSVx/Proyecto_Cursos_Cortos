@@ -4,6 +4,7 @@ from fastapi import (
     HTTPException,
     status,
 )
+
 from sqlalchemy.orm import Session
 
 from app.application.dtos.asignacion_dto import (
@@ -15,31 +16,44 @@ from app.application.dtos.asignacion_dto import (
 from app.application.use_cases.asignaciones.crear_asignacion import (
     CrearAsignacionUseCase,
 )
+
 from app.application.use_cases.asignaciones.listar_asignaciones import (
     ListarAsignacionesUseCase,
 )
+
 from app.application.use_cases.asignaciones.obtener_asignacion import (
     ObtenerAsignacionUseCase,
 )
+
 from app.application.use_cases.asignaciones.actualizar_asignacion import (
     ActualizarAsignacionUseCase,
 )
+
 from app.application.use_cases.asignaciones.eliminar_asignacion import (
     EliminarAsignacionUseCase,
 )
 
-from app.core.dependencies import get_db
-from app.domain.entities.asignacion import Asignacion
+from app.core.dependencies import (
+    get_current_user,
+    get_db,
+)
+
+from app.domain.entities.asignacion import (
+    Asignacion,
+)
 
 from app.infrastructure.repositories.asignacion_repository_impl import (
     AsignacionRepositoryImpl,
 )
+
 from app.infrastructure.repositories.curso_repository_impl import (
     CursoRepositoryImpl,
 )
+
 from app.infrastructure.repositories.instructor_repository_impl import (
     InstructorRepositoryImpl,
 )
+
 from app.infrastructure.repositories.aula_repository_impl import (
     AulaRepositoryImpl,
 )
@@ -48,6 +62,9 @@ from app.infrastructure.repositories.aula_repository_impl import (
 router = APIRouter(
     prefix="/asignaciones",
     tags=["Asignaciones"],
+    dependencies=[
+        Depends(get_current_user)
+    ],
 )
 
 
@@ -61,6 +78,11 @@ def crear_asignacion(
     db: Session = Depends(get_db),
 ):
     try:
+        asignacion = Asignacion(
+            id=None,
+            **data.model_dump()
+        )
+
         use_case = CrearAsignacionUseCase(
             AsignacionRepositoryImpl(db),
             CursoRepositoryImpl(db),
@@ -68,12 +90,9 @@ def crear_asignacion(
             AulaRepositoryImpl(db),
         )
 
-        asignacion = Asignacion(
-            id=None,
-            **data.model_dump()
+        return use_case.ejecutar(
+            asignacion
         )
-
-        return use_case.ejecutar(asignacion)
 
     except ValueError as e:
         raise HTTPException(
@@ -84,14 +103,21 @@ def crear_asignacion(
 
 @router.get(
     "/",
-    response_model=list[AsignacionResponse],
+    response_model=list[
+        AsignacionResponse
+    ],
 )
 def listar_asignaciones(
     db: Session = Depends(get_db),
 ):
-    return ListarAsignacionesUseCase(
-        AsignacionRepositoryImpl(db)
-    ).ejecutar()
+    return (
+        ListarAsignacionesUseCase(
+            AsignacionRepositoryImpl(
+                db
+            )
+        )
+        .ejecutar()
+    )
 
 
 @router.get(
@@ -103,9 +129,16 @@ def obtener_asignacion(
     db: Session = Depends(get_db),
 ):
     try:
-        return ObtenerAsignacionUseCase(
-            AsignacionRepositoryImpl(db)
-        ).ejecutar(asignacion_id)
+        return (
+            ObtenerAsignacionUseCase(
+                AsignacionRepositoryImpl(
+                    db
+                )
+            )
+            .ejecutar(
+                asignacion_id
+            )
+        )
 
     except ValueError as e:
         raise HTTPException(
@@ -129,9 +162,14 @@ def actualizar_asignacion(
             **data.model_dump()
         )
 
-        return ActualizarAsignacionUseCase(
-            AsignacionRepositoryImpl(db)
-        ).ejecutar(
+        use_case = ActualizarAsignacionUseCase(
+            AsignacionRepositoryImpl(db),
+            CursoRepositoryImpl(db),
+            InstructorRepositoryImpl(db),
+            AulaRepositoryImpl(db),
+        )
+
+        return use_case.ejecutar(
             asignacion_id,
             asignacion
         )
@@ -153,8 +191,12 @@ def eliminar_asignacion(
 ):
     try:
         EliminarAsignacionUseCase(
-            AsignacionRepositoryImpl(db)
-        ).ejecutar(asignacion_id)
+            AsignacionRepositoryImpl(
+                db
+            )
+        ).ejecutar(
+            asignacion_id
+        )
 
     except ValueError as e:
         raise HTTPException(

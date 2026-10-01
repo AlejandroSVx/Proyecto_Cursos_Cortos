@@ -33,7 +33,11 @@ from app.application.use_cases.participantes.eliminar_participante import (
     EliminarParticipanteUseCase,
 )
 
-from app.core.dependencies import get_db
+from app.core.dependencies import (
+    get_current_user,
+    get_db,
+)
+
 from app.domain.entities.participante import Participante
 from app.infrastructure.repositories.participante_repository_impl import (
     ParticipanteRepositoryImpl,
@@ -43,6 +47,9 @@ from app.infrastructure.repositories.participante_repository_impl import (
 router = APIRouter(
     prefix="/participantes",
     tags=["Participantes"],
+    dependencies=[
+        Depends(get_current_user)
+    ],
 )
 
 

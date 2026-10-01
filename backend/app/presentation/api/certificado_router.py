@@ -4,6 +4,7 @@ from fastapi import (
     HTTPException,
     status,
 )
+
 from sqlalchemy.orm import Session
 
 from app.application.dtos.certificado_dto import (
@@ -15,28 +16,40 @@ from app.application.dtos.certificado_dto import (
 from app.application.use_cases.certificados.crear_certificado import (
     CrearCertificadoUseCase,
 )
+
 from app.application.use_cases.certificados.listar_certificados import (
     ListarCertificadosUseCase,
 )
+
 from app.application.use_cases.certificados.obtener_certificado import (
     ObtenerCertificadoUseCase,
 )
+
 from app.application.use_cases.certificados.actualizar_certificado import (
     ActualizarCertificadoUseCase,
 )
+
 from app.application.use_cases.certificados.eliminar_certificado import (
     EliminarCertificadoUseCase,
 )
 
-from app.core.dependencies import get_db
-from app.domain.entities.certificado import Certificado
+from app.core.dependencies import (
+    get_current_user,
+    get_db,
+)
+
+from app.domain.entities.certificado import (
+    Certificado,
+)
 
 from app.infrastructure.repositories.certificado_repository_impl import (
     CertificadoRepositoryImpl,
 )
+
 from app.infrastructure.repositories.inscripcion_repository_impl import (
     InscripcionRepositoryImpl,
 )
+
 from app.infrastructure.repositories.curso_repository_impl import (
     CursoRepositoryImpl,
 )
@@ -45,6 +58,9 @@ from app.infrastructure.repositories.curso_repository_impl import (
 router = APIRouter(
     prefix="/certificados",
     tags=["Certificados"],
+    dependencies=[
+        Depends(get_current_user)
+    ],
 )
 
 
@@ -58,15 +74,15 @@ def crear_certificado(
     db: Session = Depends(get_db),
 ):
     try:
+        certificado = Certificado(
+            id=None,
+            **data.model_dump()
+        )
+
         use_case = CrearCertificadoUseCase(
             CertificadoRepositoryImpl(db),
             InscripcionRepositoryImpl(db),
             CursoRepositoryImpl(db),
-        )
-
-        certificado = Certificado(
-            id=None,
-            **data.model_dump()
         )
 
         return use_case.ejecutar(
@@ -82,14 +98,21 @@ def crear_certificado(
 
 @router.get(
     "/",
-    response_model=list[CertificadoResponse],
+    response_model=list[
+        CertificadoResponse
+    ],
 )
 def listar_certificados(
     db: Session = Depends(get_db),
 ):
-    return ListarCertificadosUseCase(
-        CertificadoRepositoryImpl(db)
-    ).ejecutar()
+    return (
+        ListarCertificadosUseCase(
+            CertificadoRepositoryImpl(
+                db
+            )
+        )
+        .ejecutar()
+    )
 
 
 @router.get(
@@ -101,10 +124,15 @@ def obtener_certificado(
     db: Session = Depends(get_db),
 ):
     try:
-        return ObtenerCertificadoUseCase(
-            CertificadoRepositoryImpl(db)
-        ).ejecutar(
-            certificado_id
+        return (
+            ObtenerCertificadoUseCase(
+                CertificadoRepositoryImpl(
+                    db
+                )
+            )
+            .ejecutar(
+                certificado_id
+            )
         )
 
     except ValueError as e:
@@ -129,9 +157,12 @@ def actualizar_certificado(
             **data.model_dump()
         )
 
-        return ActualizarCertificadoUseCase(
-            CertificadoRepositoryImpl(db)
-        ).ejecutar(
+        use_case = ActualizarCertificadoUseCase(
+            CertificadoRepositoryImpl(db),
+            InscripcionRepositoryImpl(db),
+        )
+
+        return use_case.ejecutar(
             certificado_id,
             certificado
         )
@@ -153,7 +184,9 @@ def eliminar_certificado(
 ):
     try:
         EliminarCertificadoUseCase(
-            CertificadoRepositoryImpl(db)
+            CertificadoRepositoryImpl(
+                db
+            )
         ).ejecutar(
             certificado_id
         )

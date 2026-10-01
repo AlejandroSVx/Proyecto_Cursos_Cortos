@@ -28,7 +28,11 @@ from app.application.use_cases.instructores.eliminar_instructor import (
     EliminarInstructorUseCase,
 )
 
-from app.core.dependencies import get_db
+from app.core.dependencies import (
+    get_current_user,
+    get_db,
+)
+
 from app.domain.entities.instructor import Instructor
 
 from app.infrastructure.repositories.instructor_repository_impl import (
@@ -39,6 +43,9 @@ from app.infrastructure.repositories.instructor_repository_impl import (
 router = APIRouter(
     prefix="/instructores",
     tags=["Instructores"],
+    dependencies=[
+        Depends(get_current_user)
+    ],
 )
 
 

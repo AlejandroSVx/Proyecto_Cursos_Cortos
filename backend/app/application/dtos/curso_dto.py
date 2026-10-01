@@ -29,3 +29,16 @@ class CursoResponse(CursoBase):
     model_config = {
         "from_attributes": True
     }
+
+class CursoConInstructorResponse(BaseModel):
+    curso_id: int
+    curso: str
+    horario: str
+
+    instructor_id: int
+    instructor: str
+
+    aula_id: int
+    aula: str
+
+    estado_asignacion: str

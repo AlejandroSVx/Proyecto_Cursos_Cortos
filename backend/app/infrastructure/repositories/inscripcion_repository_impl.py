@@ -2,10 +2,14 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
-from app.domain.entities.inscripcion import Inscripcion
+from app.domain.entities.inscripcion import (
+    Inscripcion,
+)
+
 from app.domain.repositories.inscripcion_repository import (
     InscripcionRepository,
 )
+
 from app.infrastructure.models.inscripcion_model import (
     InscripcionModel,
 )
@@ -15,7 +19,10 @@ class InscripcionRepositoryImpl(
     InscripcionRepository
 ):
 
-    def __init__(self, db: Session):
+    def __init__(
+        self,
+        db: Session
+    ):
         self.db = db
 
     def crear(
@@ -36,12 +43,16 @@ class InscripcionRepositoryImpl(
 
         return self._to_entity(modelo)
 
-    def listar(self) -> List[Inscripcion]:
+    def listar(
+        self
+    ) -> List[Inscripcion]:
 
         modelos = (
             self.db
             .query(InscripcionModel)
-            .order_by(InscripcionModel.id)
+            .order_by(
+                InscripcionModel.id
+            )
             .all()
         )
 
@@ -59,7 +70,8 @@ class InscripcionRepositoryImpl(
             self.db
             .query(InscripcionModel)
             .filter(
-                InscripcionModel.id == inscripcion_id
+                InscripcionModel.id
+                == inscripcion_id
             )
             .first()
         )
@@ -68,45 +80,6 @@ class InscripcionRepositoryImpl(
             return None
 
         return self._to_entity(modelo)
-
-    def existe_inscripcion_activa(
-        self,
-        participante_id: int,
-        curso_id: int
-    ) -> bool:
-
-        modelo = (
-            self.db
-            .query(InscripcionModel)
-            .filter(
-                InscripcionModel.participante_id
-                == participante_id,
-                InscripcionModel.curso_id
-                == curso_id,
-                InscripcionModel.estado
-                != "CANCELADA",
-            )
-            .first()
-        )
-
-        return modelo is not None
-
-    def contar_inscripciones_activas(
-        self,
-        curso_id: int
-    ) -> int:
-
-        return (
-            self.db
-            .query(InscripcionModel)
-            .filter(
-                InscripcionModel.curso_id
-                == curso_id,
-                InscripcionModel.estado
-                != "CANCELADA",
-            )
-            .count()
-        )
 
     def actualizar(
         self,
@@ -130,11 +103,18 @@ class InscripcionRepositoryImpl(
         modelo.participante_id = (
             inscripcion.participante_id
         )
-        modelo.curso_id = inscripcion.curso_id
+
+        modelo.curso_id = (
+            inscripcion.curso_id
+        )
+
         modelo.fecha_inscripcion = (
             inscripcion.fecha_inscripcion
         )
-        modelo.estado = inscripcion.estado
+
+        modelo.estado = (
+            inscripcion.estado
+        )
 
         self.db.commit()
         self.db.refresh(modelo)
@@ -163,6 +143,51 @@ class InscripcionRepositoryImpl(
         self.db.commit()
 
         return True
+
+    def existe_inscripcion_activa(
+        self,
+        participante_id: int,
+        curso_id: int,
+        excluir_inscripcion_id: int | None = None,
+    ) -> bool:
+
+        query = (
+            self.db
+            .query(InscripcionModel)
+            .filter(
+                InscripcionModel.participante_id
+                == participante_id,
+                InscripcionModel.curso_id
+                == curso_id,
+                InscripcionModel.estado
+                != "CANCELADA",
+            )
+        )
+
+        if excluir_inscripcion_id is not None:
+            query = query.filter(
+                InscripcionModel.id
+                != excluir_inscripcion_id
+            )
+
+        return query.first() is not None
+
+    def contar_inscripciones_activas(
+        self,
+        curso_id: int
+    ) -> int:
+
+        return (
+            self.db
+            .query(InscripcionModel)
+            .filter(
+                InscripcionModel.curso_id
+                == curso_id,
+                InscripcionModel.estado
+                != "CANCELADA",
+            )
+            .count()
+        )
 
     @staticmethod
     def _to_entity(

@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from app.domain.entities.inscripcion import Inscripcion
+from app.domain.entities.inscripcion import (
+    Inscripcion,
+)
 
 
 class InscripcionRepository(ABC):
@@ -14,7 +16,9 @@ class InscripcionRepository(ABC):
         pass
 
     @abstractmethod
-    def listar(self) -> List[Inscripcion]:
+    def listar(
+        self
+    ) -> List[Inscripcion]:
         pass
 
     @abstractmethod
@@ -22,21 +26,6 @@ class InscripcionRepository(ABC):
         self,
         inscripcion_id: int
     ) -> Optional[Inscripcion]:
-        pass
-
-    @abstractmethod
-    def existe_inscripcion_activa(
-        self,
-        participante_id: int,
-        curso_id: int
-    ) -> bool:
-        pass
-
-    @abstractmethod
-    def contar_inscripciones_activas(
-        self,
-        curso_id: int
-    ) -> int:
         pass
 
     @abstractmethod
@@ -52,4 +41,20 @@ class InscripcionRepository(ABC):
         self,
         inscripcion_id: int
     ) -> bool:
+        pass
+
+    @abstractmethod
+    def existe_inscripcion_activa(
+        self,
+        participante_id: int,
+        curso_id: int,
+        excluir_inscripcion_id: int | None = None,
+    ) -> bool:
+        pass
+
+    @abstractmethod
+    def contar_inscripciones_activas(
+        self,
+        curso_id: int
+    ) -> int:
         pass

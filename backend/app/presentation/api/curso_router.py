@@ -13,12 +13,22 @@ from app.application.dtos.curso_dto import (
     CursoUpdate,
 )
 
+from app.application.dtos.curso_dto import (
+    CursoCreate,
+    CursoResponse,
+    CursoUpdate,
+    CursoConInstructorResponse,
+)
 from app.application.use_cases.cursos.crear_curso import (
     CrearCursoUseCase,
 )
 
 from app.application.use_cases.cursos.listar_cursos import (
     ListarCursosUseCase,
+)
+
+from app.application.use_cases.cursos.listar_cursos_con_instructor import (
+    ListarCursosConInstructorUseCase,
 )
 
 from app.application.use_cases.cursos.obtener_curso import (
@@ -33,7 +43,10 @@ from app.application.use_cases.cursos.eliminar_curso import (
     EliminarCursoUseCase,
 )
 
-from app.core.dependencies import get_db
+from app.core.dependencies import (
+    get_current_user,
+    get_db,
+)
 from app.domain.entities.curso import Curso
 from app.infrastructure.repositories.curso_repository_impl import (
     CursoRepositoryImpl,
@@ -43,6 +56,9 @@ from app.infrastructure.repositories.curso_repository_impl import (
 router = APIRouter(
     prefix="/cursos",
     tags=["Cursos"],
+    dependencies=[
+        Depends(get_current_user)
+    ],
 )
 
 
@@ -85,14 +101,33 @@ def crear_curso(
     response_model=list[CursoResponse],
 )
 def listar_cursos(
-    repository=Depends(get_repository),
+    db: Session = Depends(get_db),
+    usuario=Depends(get_current_user),
 ):
+    repository = CursoRepositoryImpl(db)
+
     use_case = ListarCursosUseCase(
         repository
     )
 
     return use_case.ejecutar()
 
+@router.get(
+    "/con-instructor",
+    response_model=list[
+        CursoConInstructorResponse
+    ],
+)
+def listar_cursos_con_instructor(
+    db: Session = Depends(get_db),
+):
+    use_case = (
+        ListarCursosConInstructorUseCase(
+            db
+        )
+    )
+
+    return use_case.ejecutar()
 
 @router.get(
     "/{curso_id}",
